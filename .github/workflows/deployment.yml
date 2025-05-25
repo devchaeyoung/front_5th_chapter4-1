@@ -29,6 +29,7 @@ jobs:
 
     - name: Deploy to S3
       run: |
+        aws s3 rm s3://${{ secrets.S3_BUCKET_NAME }} --recursive
         aws s3 cp out/ s3://${{ secrets.S3_BUCKET_NAME }} --recursive
 
     - name: Invalidate CloudFront cache
