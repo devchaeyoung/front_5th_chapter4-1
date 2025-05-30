@@ -22,7 +22,6 @@ jobs:
           {
             "ci": {
               "collect": {
-                "staticDistDir": "out",
                 "url": [
                   "http://hanghae-front-5th-chaeyoung.s3-website.ap-northeast-2.amazonaws.com/",
                   "https://dlxgp5it7mnux.cloudfront.net/",
