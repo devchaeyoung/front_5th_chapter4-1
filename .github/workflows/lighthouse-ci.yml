@@ -95,7 +95,6 @@ jobs:
         run: |
           rm -rf .lighthouseci
 
-      # 🔍 ② 변경 파일 확인 (디버깅용)
       - name: Show git changes
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
