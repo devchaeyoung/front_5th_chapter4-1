@@ -172,4 +172,12 @@ S3 정적 사이트 배포와 CloudFront를 이용한 배포로 CDN 역할 이�
 
 
 <!-- LHCI-TABLE-START -->
+## 📈 Lighthouse 리포트
+_(업데이트: 2025-05-30 13:51 KST)_
+
+| 항목 | 점수 |
+|------|------|
+| Performance | 100 |
+| Accessibility | 100 |
+| SEO | 100 |
 <!-- LHCI-TABLE-END -->
