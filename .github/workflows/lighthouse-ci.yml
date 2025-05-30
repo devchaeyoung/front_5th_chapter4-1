@@ -20,7 +20,7 @@ jobs:
          lhci autorun
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-          
+
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq bc # bc는 Bash에서 부동소수 계산할 때 사용
 
@@ -30,7 +30,7 @@ jobs:
           urls: |
             http://hanghae-front-5th-chaeyoung.s3-website.ap-northeast-2.amazonaws.com/
             https://dlxgp5it7mnux.cloudfront.net/
-            https://dlxgp5it7mnux.cloudfront.net/
+            https://devforworld.com/
 
           configPath: ./lighthouserc.json
           uploadArtifacts: false
