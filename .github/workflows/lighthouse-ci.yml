@@ -33,7 +33,7 @@ jobs:
                 "assertions": {
                   "categories:performance": ["warn", {"minScore": 0.8}],
                   "categories:accessibility": ["warn", {"minScore": 0.9}],
-                  "is-crawlable": "off",          // 404 noindex 실패 방지
+                  "is-crawlable": "off",
                   "unused-javascript": ["warn", {"maxLength": 2}]
                 }
               },
@@ -42,7 +42,7 @@ jobs:
               }
             }
           }
-          EO
+          EOF
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq bc # bc는 Bash에서 부동소수 계산할 때 사용
@@ -55,7 +55,7 @@ jobs:
           temporaryPublicStorage: true
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-          
+
       - name: Build Lighthouse summary table
         id: make_table
         run: |
