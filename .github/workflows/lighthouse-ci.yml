@@ -14,12 +14,35 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-      - run: |
-         npm install && npm install -g @lhci/cli@0.14.x
-         npm run build
-         lhci autorun
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+      - run: npm ci
+
+      - name: Generate lighthouserc.json
+        run: |
+          cat > lighthouserc.json <<'EOF'
+          {
+            "ci": {
+              "collect": {
+                "staticDistDir": "out",
+                "url": [
+                  "http://hanghae-front-5th-chaeyoung.s3-website.ap-northeast-2.amazonaws.com/",
+                  "https://dlxgp5it7mnux.cloudfront.net/",
+                  "https://devforworld.com/"
+                ]
+              },
+              "assert": {
+                "assertions": {
+                  "categories:performance": ["warn", {"minScore": 0.8}],
+                  "categories:accessibility": ["warn", {"minScore": 0.9}],
+                  "is-crawlable": "off",          // 404 noindex 실패 방지
+                  "unused-javascript": ["warn", {"maxLength": 2}]
+                }
+              },
+              "upload": {
+                "target": "temporary-public-storage"
+              }
+            }
+          }
+          EO
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq bc # bc는 Bash에서 부동소수 계산할 때 사용
@@ -27,11 +50,47 @@ jobs:
       - name: Audit URLs using Lighthouse
         uses: treosh/lighthouse-ci-action@v12
         with:
-          urls: |
-            http://hanghae-front-5th-chaeyoung.s3-website.ap-northeast-2.amazonaws.com/
-            https://dlxgp5it7mnux.cloudfront.net/
-            https://devforworld.com/
-
           configPath: ./lighthouserc.json
           uploadArtifacts: false
           temporaryPublicStorage: true
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          
+      - name: Build Lighthouse summary table
+        id: make_table
+        run: |
+          DATE=$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M')
+          FILE=$(ls -t .lighthouseci/*.report.json | head -1)   # 최신 결과 한 개
+
+          PERF=$(jq -r '.categories.performance.score * 100' "$FILE")
+          ACC=$(jq -r '.categories.accessibility.score * 100' "$FILE")
+          SEO=$(jq -r '.categories.seo.score * 100' "$FILE")
+
+          {
+            echo "## 📈 Lighthouse 리포트"
+            echo "_(업데이트: $DATE KST)_"
+            echo ""
+            echo "| 항목 | 점수 |"
+            echo "|------|------|"
+            echo "| Performance | $PERF |"
+            echo "| Accessibility | $ACC |"
+            echo "| SEO | $SEO |"
+          } > lhci-summary.md
+
+      # ② README 중간에 표 삽입(주석 사이만 교체)
+      - name: Inject summary into README.md
+        run: |
+          awk '
+            BEGIN {in=0}
+            /<!-- LHCI-TABLE-START -->/ {print; system("cat lhci-summary.md"); in=1; next}
+            /<!-- LHCI-TABLE-END -->/ {in=0}
+            !in
+          ' README.md > README.tmp && mv README.tmp README.md
+
+      # ③ 변경사항 자동 커밋·푸시
+      - name: Commit & push if README changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: 업데이트 Lighthouse 리포트"
+          branch: main
+          file_pattern: README.md
