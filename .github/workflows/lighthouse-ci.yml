@@ -78,13 +78,16 @@ jobs:
 
       # ② README 중간에 표 삽입(주석 사이만 교체)
       - name: Inject summary into README.md
+        if: steps.make_table.outputs.noReport != 'true'
         run: |
-          awk '
-            BEGIN {in=0}
-            /<!-- LHCI-TABLE-START -->/ {print; system("cat lhci-summary.md"); in=1; next}
-            /<!-- LHCI-TABLE-END -->/ {in=0}
-            !in
-          ' README.md > README.tmp && mv README.tmp README.md
+          awk -f - README.md <<'AWK' > README.tmp
+          BEGIN{skip=0}
+          /<!-- LHCI-TABLE-START -->/ {print; system("cat lhci-summary.md"); skip=1; next}
+          /<!-- LHCI-TABLE-END -->/   {print; skip=0; next}
+          !skip
+          AWK
+          mv README.tmp README.md
+
 
       # ③ 변경사항 자동 커밋·푸시
       - name: Commit & push if README changed
