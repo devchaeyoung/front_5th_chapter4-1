@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - main
+permissions:          # 👈 추가
+  contents: write     # README 커밋·푸시용
+  pull-requests: write  # (PR 자동 생성 플로우가 필요할 때)
     
 jobs:
   lighthouse:
@@ -88,6 +91,18 @@ jobs:
           AWK
           mv README.tmp README.md
 
+      - name: Cleanup .Lighthouseci
+        run: |
+          rm -rf .lighthouseci
+
+      # 🔍 ② 변경 파일 확인 (디버깅용)
+      - name: Show git changes
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          echo "=== git status ==="
+          git status -s
+          echo "=== diff stat ==="
+          git diff --stat || true
 
       # ③ 변경사항 자동 커밋·푸시
       - name: Commit & push if README changed
