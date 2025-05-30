@@ -50,27 +50,27 @@ GitHub과 AWS를 사용해 CDN이 적용된 프론트엔드 프로젝트 CI/CD �
 ![아키텍처](./public/imgs/cicd-achitec.png)
 
 ## 네트워크 탭으로 비교해보기
-<div style="witdh: 100%; display:flex; gap: 4px;">
-<div>
-<h3>S3</h3>
-<img src="./public/imgs/network-s3.png">
-</div>
-<div>
-<h3>Cloud Front</h3>
-<img src="./public/imgs/network-cloudfront.png">
-</div>
-</div>
+<table>
+  <tr>
+    <td align="center"><strong>S3</strong></td>
+    <td align="center"><strong>CloudFront</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./public/imgs/network-s3.png"  width="350"></td>
+    <td><img src="./public/imgs/network-cloudfront.png" width="350"></td>
+  </tr>
+</table>
 
-<div style="witdh: 100%; display:flex; gap: 4px;">
-<div>
-<h3>Cloud Front</h3>
-<img src="./public/imgs/network-cloudfront.png">
-</div>
-<div>
-<h3>Route53</h3>
-<img src="./public/imgs/network-route53.png">
-</div>
-</div>
+<table>
+  <tr>
+    <td align="center"><strong>CloudFront</strong></td>
+    <td align="center"><strong>Route 53</strong></td>
+  </tr>
+  <tr>
+    <td><img src="./public/imgs/network-cloudfront.png" width="350"></td>
+    <td><img src="./public/imgs/network-route53.png"  width="350"></td>
+  </tr>
+</table>
 
 ### CDN 적용 성능 비교
 
