@@ -124,14 +124,14 @@ S3 정적 사이트 배포와 CloudFront를 이용한 배포로 CDN 역할 이�
 | **연결 최적화** | POP에서 TLS 종료, HTTP/2·3 멀티플렉싱, TCP/QUIC 튜닝 | TLS·TCP 핸드셰이크가 리전까지 왕복, HTTP/1.1 직렬 전송 가능성 |
 | **가용성·보안** | POP–Origin 간 keep-alive, WAF·Geo 차단·Origin Shield 지원 | S3 ACL·정책으로만 제어, WAF 적용 불가 |
 
-> **요약**: S3는 “저장소 + 정적 호스팅”까지는 해결하지만,  
+> S3는 “저장소 + 정적 호스팅”까지는 해결하지만,  
 > - 지리적으로 한 곳에만 존재  
 > - 전용 캐시·백본 최적화가 없음  
 > ⇒ 사용자 ↔ S3 사이 RTT·디스크 지연이 고스란히 적용  
-> 반면 CloudFront는 **Edge 캐시 + 백본 전송 + 프로토콜 업그레이드**로 3 단계(전송·연결·디스크) 지연을 줄인다.
+> 반면 CloudFront는 **Edge 캐시 + 백본 전송 + 프로토콜 업그레이드**로 3 단계(전송·연결·디스크) 지연을 줄일 수 있음
 
 
-1. **222 ms 중 약 80 %는 TTFB 차이**  
+1. **222 ms 중 약 80 %는 TTFB 차이**
    * CloudFront HIT: TTFB 5 ~ 15 ms  
    * S3: TTFB ≈ 170 ~ 220 ms (리전 RTT + S3 디스크 읽기)  
 2. **연결 오버헤드**  
@@ -158,23 +158,7 @@ S3 정적 사이트 배포와 CloudFront를 이용한 배포로 CDN 역할 이�
 | **보안·운영** | WAF, Shield, OAC(Origin Access Control)로 보안 레이어 추가 |
 | **확장성** | 오브젝트 수 / 트래픽 급증 시에도 Edge 자체 확장, S3 한계 없음 |
 
-
-
----
-
-## 4. 권고 사항
-
-| 항목        | 권고 설정                                                                                  |
-| --------- | -------------------------------------------------------------------------------------- |
-| **DNS**   | Route 53 `A (alias)` 레코드를 CloudFront 도메인에 매핑 (기존 Origin 레코드는 백업용 CNAME 으로 보존)          |
-| **캐시 정책** | `Cache-Control: public, max-age=0, s-maxage=31536000, immutable` (정적 자산)               |
-| **프로토콜**  | CloudFront 배포에서 **HTTP/2 + HTTP/3(QUIC)** 활성화                                          |
-| **모니터링**  | CloudFront `x-edge-detailed-result-type`, TTFB p95 지표를 CloudWatch 대시보드로 시각화            |
-| **실험 설계** | 신규 기능 배포 시 **A/B (% 트래픽) ↔ CloudFront / Origin** 성능 로그를 함께 수집해, 지속적으로 HIT 률·비용·지표를 최적화 |
-
----
-
-### 참고 자료
+### 참고
 
 * CloudFront 가 **글로벌 Edge 네트워크를 통해 “low latency” 전송**을 제공 — AWS Static Website Whitepaper ([AWS 문서][4])
 * 요청은 **가장 가까운 POP으로 라우팅**되어 캐시 검사 후 응답 — CloudFront Developer Guide ([AWS 문서][1])

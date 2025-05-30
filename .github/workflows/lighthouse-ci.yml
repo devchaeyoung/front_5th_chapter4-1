@@ -1,15 +1,37 @@
-name: CI
-on: [push]
+name: Light House CI
+on:
+  push:
+    branches:
+      - main
+    
 jobs:
-  lighthouseci:
+  lighthouse:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
-      - run: npm install && npm install -g @lhci/cli@0.14.x
-      - run: npm run build
-      - run: lhci autorun
+          node-version: 20
+          cache: 'npm'
+      - run: |
+         npm install && npm install -g @lhci/cli@0.14.x
+         npm run build
+         lhci autorun
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq bc # bc는 Bash에서 부동소수 계산할 때 사용
+
+      - name: Audit URLs using Lighthouse
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            http://hanghae-front-5th-chaeyoung.s3-website.ap-northeast-2.amazonaws.com/
+            https://dlxgp5it7mnux.cloudfront.net/
+            https://dlxgp5it7mnux.cloudfront.net/
+
+          configPath: ./lighthouserc.json
+          uploadArtifacts: false
+          temporaryPublicStorage: true
