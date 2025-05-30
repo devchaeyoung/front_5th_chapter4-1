@@ -76,7 +76,7 @@ jobs:
               for F in S3_FILE CF_FILE R53_FILE; do
                 FILE=${!F}
                 if [[ -n "$FILE" ]]; then
-                  eval "$(cat <<EOF
+                  eval "$(cat <<'EOF'
               ${F%_FILE}_PERF=\$(get "$FILE" '.categories.performance.score')
               ${F%_FILE}_ACC=\$(get "$FILE" '.categories.accessibility.score')
               ${F%_FILE}_SEO=\$(get "$FILE" '.categories.seo.score')
@@ -87,7 +87,7 @@ jobs:
 
               DATE=$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M')
 
-              cat > lhci-summary.md <<EOF
+              cat > lhci-summary.md <<'EOF'
               _(업데이트: $DATE KST)_
 
               | 항목 | S3 | CloudFront | Route 53 |
