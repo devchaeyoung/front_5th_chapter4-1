@@ -61,7 +61,7 @@ jobs:
       - name: Build Lighthouse compare table
         id: make_table
         run: |
-          set -e
+          set -euo pipefail
           DATE=$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M')
           
           declare -A LABELS=(

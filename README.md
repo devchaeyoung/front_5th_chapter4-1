@@ -49,6 +49,23 @@ GitHub과 AWS를 사용해 CDN이 적용된 프론트엔드 프로젝트 CI/CD �
 
 ![아키텍처](./public/imgs/cicd-achitec.png)
 
+1. 트리거 설정
+
+  - main 브랜치로 push가 발생하거나, GitHub UI에서 수동으로 workflow_dispatch를 실행할 때 작동합니다.
+2. 코드 체크아웃
+  - actions/checkout@v4 액션으로 저장소의 현재 커밋을 가져옵니다.
+3. 프로젝트 의존성 설치
+  - npm ci 명령어로 package-lock.json 기준의 의존성을 깨끗하게 설치합니다.
+4. Next.js 빌드
+  - npm run build 을 실행해 정적 산출물(out/ 폴더)을 생성합니다.
+5. AWS 자격 증명 구성
+  - aws-actions/configure-aws-credentials@v4.1.0 액션으로 AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION 시크릿을 사용해 CLI 자격 증명을 주입합니다.
+6. S3 배포
+  - 기존 객체를 aws s3 rm … --recursive로 전체 삭제한 뒤,
+7. aws s3 cp out/ … --recursive로 새로 빌드된 파일을 업로드해 동기화합니다.
+8. CloudFront 캐시 무효화
+  - aws cloudfront create-invalidation 명령으로 배포 ID(CLOUDFRONT_DISTRIBUTION_ID 시크릿) 대상의 모든 경로("/*") 캐시를 즉시 비웁니다.
+
 ## 네트워크 탭으로 비교해보기
 <table>
   <tr>
