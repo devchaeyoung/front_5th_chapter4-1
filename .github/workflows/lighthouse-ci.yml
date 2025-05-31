@@ -58,44 +58,48 @@ jobs:
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
-      - name: Build Lighthouse summary table
+      - name: Build Lighthouse compare table
         id: make_table
         run: |
-              set -euo pipefail
-
-              S3_FILE=$(ls -t .lighthouseci/*hanghae_front_5th_chaeyoung* 2>/dev/null | head -1 || true)
-              CF_FILE=$(ls -t .lighthouseci/*cloudfront_net*              2>/dev/null | head -1 || true)
-              R53_FILE=$(ls -t .lighthouseci/*devforworld_com*            2>/dev/null | head -1 || true)
-
-              if [[ -z "$S3_FILE$CF_FILE$R53_FILE" ]]; then
-                echo "noReport=true" >> "$GITHUB_OUTPUT"
-                exit 0
-              fi
-
-              get() { jq -r "$2 // 0 * 100" "$1"; }
-              for F in S3_FILE CF_FILE R53_FILE; do
-                FILE=${!F}
-                if [[ -n "$FILE" ]]; then
-                  eval "$(cat <<'EOF'
-              ${F%_FILE}_PERF=\$(get "$FILE" '.categories.performance.score')
-              ${F%_FILE}_ACC=\$(get "$FILE" '.categories.accessibility.score')
-              ${F%_FILE}_SEO=\$(get "$FILE" '.categories.seo.score')
-              EOF
-              )"
-                    fi
-                  done
-
-              DATE=$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M')
-
-              cat > lhci-summary.md <<'EOF'
-              _(업데이트: $DATE KST)_
-
-              | 항목 | S3 | CloudFront | Route 53 |
-              |------|---:|-----------:|---------:|
-              | Performance | \${S3_PERF:-N/A} | \${CF_PERF:-N/A} | \${R53_PERF:-N/A} |
-              | Accessibility | \${S3_ACC:-N/A} | \${CF_ACC:-N/A} | \${R53_ACC:-N/A} |
-              | SEO | \${S3_SEO:-N/A} | \${CF_SEO:-N/A} | \${R53_SEO:-N/A} |
-              EOF
+          set -e
+          DATE=$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M')
+          
+          declare -A LABELS=(
+            ["hanghae-front-5th-chaeyoung_s3_website"]="S3"
+            ["d3jxcj7xvwc1i5_cloudfront_net"]="CloudFront"
+            ["devforworld_com"]="Route53"
+          )
+          
+          function val() { jq -r "$2" "$1" 2>/dev/null || echo "N/A"; }
+          
+          HEADER="| Metric |"
+          for slug in "${!LABELS[@]}"; do HEADER+=" ${LABELS[$slug]} |"; done
+          HEADER+="\n|--------|"$(printf '------|' "${!LABELS[@]}")"\n"
+          
+          function make_row() {
+            local title=$1 jqPath=$2 fmt=$3
+            ROW="| $title |"
+            for slug in "${!LABELS[@]}"; do
+              file=$(ls -t .lighthouseci/${slug}*.report.json | head -1 || true)
+              [ -z "$file" ] && ROW+=" - |" && continue
+              raw=$(val "$file" "$jqPath")
+              [[ $raw == "null" || -z $raw ]] && raw="N/A"
+              printf -v cell "$fmt" "$raw"
+              ROW+=" $cell |"
+            done
+            echo "$ROW"
+          }
+          
+          {
+            echo "## 🚦 Lighthouse 비교 (업데이트: $DATE KST)"
+            echo
+            printf "$HEADER"
+            make_row "Performance" '.categories.performance.score*100' '%.0f'
+            make_row "Accessibility" '.categories.accessibility.score*100' '%.0f'
+            make_row "SEO" '.categories.seo.score*100' '%.0f'
+            make_row "LCP (ms)" '.audits."largest-contentful-paint".numericValue' '%.0f'
+            make_row "TTFB (ms)" '.audits."server-response-time".numericValue' '%.0f'
+          } > lhci-summary.md
 
       # ② README 중간에 표 삽입(주석 사이만 교체)
       - name: Inject summary into README.md
