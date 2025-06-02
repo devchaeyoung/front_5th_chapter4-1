@@ -74,7 +74,7 @@ jobs:
           
           HEADER="| Metric |"
           for slug in "${!LABELS[@]}"; do HEADER+=" ${LABELS[$slug]} |"; done
-          HEADER+="\n|--------|"$(printf '------|' "${!LABELS[@]}")"\n"
+          HEADER+="\n|--------|"$(--printf '------|' "${!LABELS[@]}")"\n"
           
           function make_row() {
             local title=$1 jqPath=$2 fmt=$3
