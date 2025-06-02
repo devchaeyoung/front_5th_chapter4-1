@@ -190,10 +190,9 @@ S3 정적 사이트 배포와 CloudFront를 이용한 배포로 CDN 역할 이�
 ## 🚦 Lighthouse 비교
 
 <!-- LHCI-TABLE-START -->
-## 🚦 Lighthouse 비교
-(업데이트: 2025-06-02 12:32 KST)
+(업데이트: 2025-06-02 12:42 KST)
 
-| Metric | S3 | Route53 | CloudFront |
+| Metric | Route53 | CloudFront | S3 |
 |--------|------|------|------|
 | Performance | - | - | - |
 | Accessibility | - | - | - |
