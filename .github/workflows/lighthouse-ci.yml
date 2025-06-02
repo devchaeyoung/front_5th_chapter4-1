@@ -65,9 +65,9 @@ jobs:
           DATE=$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M')
           
           declare -A LABELS=(
-            ["http://hanghae-front-5th-chaeyoung.s3-website.ap-northeast-2.amazonaws.com"]="S3"
-            ["https://dlxgp5it7mnux.cloudfront.net/"]="CloudFront"
-            ["https://devforworld.com/"]="Route53"
+            ["hanghae-front-5th-chaeyoung.s3-website.ap-northeast-2.amazonaws.com"]="S3"
+            ["dlxgp5it7mnux.cloudfront.net"]="CloudFront"
+            ["devforworld.com"]="Route53"
           )
           
           val() { jq -r "$2" "$1" 2>/dev/null || echo "N/A"; }
@@ -96,7 +96,8 @@ jobs:
           }
           
           {
-            echo "## 🚦 Lighthouse 비교 (업데이트: $DATE KST)"
+            echo "## 🚦 Lighthouse 비교"
+            echo "(업데이트: $DATE KST)"
             echo
             printf "%b" "$HEADER"
             make_row "Performance"      '.categories.performance.score*100'         '%.0f'
