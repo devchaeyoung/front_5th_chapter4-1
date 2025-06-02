@@ -65,7 +65,7 @@ jobs:
           DATE=$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M')
           
           declare -A LABELS=(
-            ["hanghae-front-5th-chaeyoung_s3-website_ap-northeast-2_amazonaws_com"]="S3"
+            ["hanghae_front_5th_chaeyoung_s3_website_ap_northeast_2_amazonaws_com"]="S3"
             ["dlxgp5it7mnux_cloudfront_net"]="CloudFront"
             ["devforworld_com"]="Route53"
           )
