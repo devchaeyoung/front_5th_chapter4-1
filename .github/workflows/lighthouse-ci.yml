@@ -65,9 +65,9 @@ jobs:
           DATE=$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M')
           
           declare -A LABELS=(
-            ["http://hanghae-front-5th-chaeyoung.s3-website.ap-northeast-2.amazonaws.com/"]="S3"
-            ["https://dlxgp5it7mnux.cloudfront.net/"]="CloudFront"
-            ["https://devforworld.com/"]="Route53"
+            ["hanghae-front-5th-chaeyoung_s3-website_ap-northeast-2_amazonaws_com"]="S3"
+            ["dlxgp5it7mnux_cloudfront_net"]="CloudFront"
+            ["devforworld_com"]="Route53"
           )
           
           val() { jq -r "$2" "$1" 2>/dev/null || echo "N/A"; }
