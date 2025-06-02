@@ -70,36 +70,43 @@ jobs:
             ["devforworld_com"]="Route53"
           )
           
-          function val() { jq -r "$2" "$1" 2>/dev/null || echo "N/A"; }
+          val() { jq -r "$2" "$1" 2>/dev/null || echo "N/A"; }
           
           HEADER="| Metric |"
           for slug in "${!LABELS[@]}"; do HEADER+=" ${LABELS[$slug]} |"; done
-          HEADER+="\n|--------|"$(--printf '------|' "${!LABELS[@]}")"\n"
+          SEP=$(printf -- '------|%.0s' "${!LABELS[@]}")
+          HEADER+="\n|--------|${SEP}\n"
           
-          function make_row() {
-            local title=$1 jqPath=$2 fmt=$3
-            ROW="| $title |"
+          make_row() {
+            local title=$1 path=$2 fmt=$3
+            local row="| $title |"
             for slug in "${!LABELS[@]}"; do
-              file=$(ls -t .lighthouseci/${slug}*.report.json | head -1 || true)
-              [ -z "$file" ] && ROW+=" - |" && continue
-              raw=$(val "$file" "$jqPath")
+              local file=$(ls -t .lighthouseci/${slug}*.report.json 2>/dev/null | head -1 || true)
+              if [[ -z $file ]]; then row+=" - |"; continue; fi
+              local raw=$(val "$file" "$path")
               [[ $raw == "null" || -z $raw ]] && raw="N/A"
-              printf -v cell "$fmt" "$raw"
-              ROW+=" $cell |"
+              if [[ $raw =~ ^[0-9.]+$ ]]; then
+                printf -v cell "$fmt" "$raw"
+              else
+                cell="$raw"
+              fi
+              row+=" $cell |"
             done
-            echo "$ROW"
+            echo "$row"
           }
           
           {
             echo "## 🚦 Lighthouse 비교 (업데이트: $DATE KST)"
             echo
-            printf "$HEADER"
-            make_row "Performance" '.categories.performance.score*100' '%.0f'
-            make_row "Accessibility" '.categories.accessibility.score*100' '%.0f'
-            make_row "SEO" '.categories.seo.score*100' '%.0f'
-            make_row "LCP (ms)" '.audits."largest-contentful-paint".numericValue' '%.0f'
-            make_row "TTFB (ms)" '.audits."server-response-time".numericValue' '%.0f'
+            printf "%b" "$HEADER"
+            make_row "Performance"      '.categories.performance.score*100'         '%.0f'
+            make_row "Accessibility"    '.categories.accessibility.score*100'       '%.0f'
+            make_row "SEO"              '.categories.seo.score*100'                 '%.0f'
+            make_row "LCP (ms)"         '.audits."largest-contentful-paint".numericValue' '%.0f'
+            make_row "TTFB (ms)"        '.audits."server-response-time".numericValue'      '%.0f'
           } > lhci-summary.md
+          
+          echo "noReport=false" >> "$GITHUB_OUTPUT"
 
       # ② README 중간에 표 삽입(주석 사이만 교체)
       - name: Inject summary into README.md
